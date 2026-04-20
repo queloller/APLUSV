@@ -20,25 +20,35 @@ EMP_A = 0.046405
 EMP_B = 1.854865
 EMP_C = 1.837475
 
+# ==========================================
 # SESSION STATE INITIALIZATION
-# Initialize the variables in Streamlit's memory so they stay synced
-if 'payload_weight' not in st.session_state:
-    st.session_state.payload_weight = 24
-if 'sensor_draw' not in st.session_state:
-    st.session_state.sensor_draw = 50
+# ==========================================
+# Initialize the widget keys directly (No need for a master variable)
+if 'payload_slider' not in st.session_state:
+    st.session_state.payload_slider = 24
+if 'payload_num' not in st.session_state:
+    st.session_state.payload_num = 24
+if 'sensor_slider' not in st.session_state:
+    st.session_state.sensor_slider = 50
+if 'sensor_num' not in st.session_state:
+    st.session_state.sensor_num = 50
 
-# Callback functions to tie the sliders and number boxes together
-def sync_payload_from_slider():
-    st.session_state.payload_weight = st.session_state.payload_slider
-def sync_payload_from_num():
-    st.session_state.payload_weight = st.session_state.payload_num
+# Callbacks: When one changes, explicitly overwrite the OTHER'S key
+def sync_payload(source):
+    if source == 'slider':
+        st.session_state.payload_num = st.session_state.payload_slider
+    else:
+        st.session_state.payload_slider = st.session_state.payload_num
 
-def sync_sensor_from_slider():
-    st.session_state.sensor_draw = st.session_state.sensor_slider
-def sync_sensor_from_num():
-    st.session_state.sensor_draw = st.session_state.sensor_num
+def sync_sensor(source):
+    if source == 'slider':
+        st.session_state.sensor_num = st.session_state.sensor_slider
+    else:
+        st.session_state.sensor_slider = st.session_state.sensor_num
 
+# ==========================================
 # SIDEBAR INPUTS
+# ==========================================
 st.sidebar.header("Battery Parameters")
 voltage = st.sidebar.number_input("Battery Voltage (V)", min_value=12.0, max_value=60.0, value=25.6, step=0.1)
 capacity = st.sidebar.number_input("Battery Capacity (Ah)", min_value=10.0, max_value=500.0, value=100.0, step=1.0)
@@ -46,38 +56,39 @@ discharge = st.sidebar.slider("Allowable Discharge (%)", min_value=10, max_value
 
 st.sidebar.header("Mission Parameters")
 
-# Payload Weight UI 
+# Payload Weight UI (Notice value= is removed)
 st.sidebar.markdown("**Payload Weight (lbs)**")
-col1, col2 = st.sidebar.columns([3, 1]) # The [3, 1] ratio makes the slider wider than the box
+col1, col2 = st.sidebar.columns([3, 1])
 with col1:
     st.slider("Payload Slider", min_value=0, max_value=180, step=2, 
-              key="payload_slider", value=st.session_state.payload_weight, 
-              on_change=sync_payload_from_slider, label_visibility="collapsed")
+              key="payload_slider", on_change=sync_payload, args=('slider',), 
+              label_visibility="collapsed")
 with col2:
     st.number_input("Payload Num", min_value=0, max_value=180, step=2, 
-                    key="payload_num", value=st.session_state.payload_weight, 
-                    on_change=sync_payload_from_num, label_visibility="collapsed")
+                    key="payload_num", on_change=sync_payload, args=('num',), 
+                    label_visibility="collapsed")
 
-# Active Sensor Draw UI
+# Active Sensor Draw UI (Notice value= is removed)
 st.sidebar.markdown("**Active Sensor Draw (W)**")
 col3, col4 = st.sidebar.columns([3, 1])
 with col3:
     st.slider("Sensor Slider", min_value=0, max_value=500, step=5, 
-              key="sensor_slider", value=st.session_state.sensor_draw, 
-              on_change=sync_sensor_from_slider, label_visibility="collapsed")
+              key="sensor_slider", on_change=sync_sensor, args=('slider',), 
+              label_visibility="collapsed")
 with col4:
     st.number_input("Sensor Num", min_value=0, max_value=500, step=5, 
-                    key="sensor_num", value=st.session_state.sensor_draw, 
-                    on_change=sync_sensor_from_num, label_visibility="collapsed")
+                    key="sensor_num", on_change=sync_sensor, args=('num',), 
+                    label_visibility="collapsed")
 
-
+# ==========================================
 # CALCULATIONS
-payload = st.session_state.payload_weight
-payload_draw = st.session_state.sensor_draw
+# ==========================================
+# Pull the math variables straight from the slider keys
+payload = st.session_state.payload_slider
+payload_draw = st.session_state.sensor_slider
 
 usable_energy_wh = voltage * capacity * (discharge / 100.0)
 total_hotel_power = hotel_power_baseline + payload_draw
-
 
 # CdA Extrapolation
 if payload < 24:
@@ -115,7 +126,9 @@ if ranges:
     opt_speed = valid_speeds[ranges.index(max_range)]
     max_endurance = max_range/opt_speed*1000/3600
     max_end_hrs = int(max_endurance)
-    max_end_mins = int((max_endurance-max_end_hrs)/60)
+    
+    # [BUG FIX HERE] Multiply by 60 to get minutes
+    max_end_mins = int((max_endurance - max_end_hrs) * 60)
 else:
     max_range = 0
     opt_speed = 0
@@ -123,40 +136,4 @@ else:
     max_end_mins = 0
 
 # DASHBOARD DISPLAY
-col1, col2, col3, col4 = st.columns(4)
-col1.metric(label="Maximum Track Distance", value=f"{max_range:.1f} km")
-col2.metric(label="Maximum Endurance", value=f"{max_end_hrs}h {max_end_mins:02d}m")
-col3.metric(label="Optimal Survey Speed", value=f"{opt_speed:.2f} m/s")
-col4.metric(label="Total Usable Energy", value=f"{usable_energy_wh:.0f} Wh")
-
-st.markdown("---")
-
-# Plotly Interactive Chart
-fig = go.Figure()
-fig.add_trace(go.Scatter(
-    x=valid_speeds, 
-    y=ranges, 
-    mode='lines', 
-    name='Range Profile',
-    line=dict(color='#1976D2', width=3)
-))
-
-# Highlight the optimal point
-fig.add_trace(go.Scatter(
-    x=[opt_speed], 
-    y=[max_range], 
-    mode='markers', 
-    name='Optimal Cruise',
-    marker=dict(color='#D32F2F', size=10, symbol='star')
-))
-
-fig.update_layout(
-    title="Mission Range vs. Speed",
-    xaxis_title="Survey Speed (m/s)",
-    yaxis_title="Total Range (km)",
-    hovermode="x unified",
-    template="plotly_white",
-    showlegend=False
-)
-
-st.plotly_chart(fig, use_container_width=True)
+# ... (Leave the rest of your dashboard and Plotly code exactly as it is) ...
