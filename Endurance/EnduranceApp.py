@@ -3,16 +3,12 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-# ==========================================
 # PAGE CONFIGURATION
-# ==========================================
 st.set_page_config(page_title="APLUSV Range Optimizer", layout="wide")
 st.title("APLUSV Range & Optimal Speed Calculator")
-st.markdown("Dynamic systems engineering tool to calculate optimal survey speed and maximum track distance based on hull hydrodynamics and empirical ApisQueen U92 power curves.")
+st.markdown("Calculate optimal survey speed and maximum track distance for APLUSV.")
 
-# ==========================================
-# CONSTANTS & PHYSICS
-# ==========================================
+# CONSTANTS
 rho_w = 1000 # kg/m^3
 num_thrusters = 2
 v_pitch = 3.94 # m/s
@@ -24,9 +20,7 @@ EMP_A = 0.046405
 EMP_B = 1.854865
 EMP_C = 1.837475
 
-# ==========================================
 # SIDEBAR INPUTS
-# ==========================================
 st.sidebar.header("Battery Parameters")
 voltage = st.sidebar.number_input("Battery Voltage (V)", min_value=12.0, max_value=60.0, value=25.6, step=0.1)
 capacity = st.sidebar.number_input("Battery Capacity (Ah)", min_value=10.0, max_value=500.0, value=100.0, step=1.0)
@@ -34,15 +28,13 @@ discharge = st.sidebar.slider("Allowable Discharge (%)", min_value=10, max_value
 
 st.sidebar.header("Mission Parameters")
 payload = st.sidebar.slider("Payload Weight (lbs)", min_value=0, max_value=180, value=24, step=2)
-payload_draw = st.sidebar.slider("Active Sensor Draw (W)", min_value=0, max_value=500, value=50, step=5)
+payload_draw = st.sidebar.slider("Payload Power Draw (W)", min_value=0, max_value=500, value=50, step=5)
 
-# ==========================================
 # CALCULATIONS
-# ==========================================
 usable_energy_wh = voltage * capacity * (discharge / 100.0)
 total_hotel_power = hotel_power_baseline + payload_draw
 
-# Dynamic CdA Extrapolation
+# CdA Extrapolation
 if payload < 24:
     cda = -0.00001649 * (payload**2) + 0.0009375 * payload + 0.0726
 else:
@@ -61,7 +53,7 @@ for v in speeds:
     p_motor_single = (EMP_A * (t_single**2)) + (EMP_B * t_single) + EMP_C
     total_motor_power = p_motor_single * num_thrusters
     
-    # Brick Wall Cutoff: If ESCs max out, USV cannot reach this speed
+    # Cutoff: USV cannot reach this speed
     if total_motor_power > MAX_MOTOR_POWER_TOTAL:
         break
         
@@ -80,9 +72,7 @@ else:
     max_range = 0
     opt_speed = 0
 
-# ==========================================
 # DASHBOARD DISPLAY
-# ==========================================
 col1, col2, col3 = st.columns(3)
 col1.metric(label="Maximum Track Distance", value=f"{max_range:.1f} km")
 col2.metric(label="Optimal Survey Speed", value=f"{opt_speed:.2f} m/s")
