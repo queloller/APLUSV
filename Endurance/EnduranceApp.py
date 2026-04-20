@@ -68,15 +68,21 @@ for v in speeds:
 if ranges:
     max_range = max(ranges)
     opt_speed = valid_speeds[ranges.index(max_range)]
+    max_endurance = max_range/opt_speed*1000/3600
+    max_end_hrs = int(max_endurance)
+    max_end_mins = int((max_endurance-max_end_hrs)/60)
 else:
     max_range = 0
     opt_speed = 0
+    max_end_hrs = 0
+    max_end_mins = 0
 
 # DASHBOARD DISPLAY
-col1, col2, col3 = st.columns(3)
+col1, col2, col3, col4 = st.columns(4)
 col1.metric(label="Maximum Track Distance", value=f"{max_range:.1f} km")
-col2.metric(label="Optimal Survey Speed", value=f"{opt_speed:.2f} m/s")
-col3.metric(label="Total Usable Energy", value=f"{usable_energy_wh:.0f} Wh")
+col2.metric(label="Maximum Endurance", value=f"{hours}h {minutes:02d}m")
+col3.metric(label="Optimal Survey Speed", value=f"{opt_speed:.2f} m/s")
+col4.metric(label="Total Usable Energy", value=f"{usable_energy_wh:.0f} Wh")
 
 st.markdown("---")
 
