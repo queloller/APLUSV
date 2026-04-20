@@ -136,4 +136,40 @@ else:
     max_end_mins = 0
 
 # DASHBOARD DISPLAY
-# ... (Leave the rest of your dashboard and Plotly code exactly as it is) ...
+col1, col2, col3, col4 = st.columns(4)
+col1.metric(label="Maximum Track Distance", value=f"{max_range:.1f} km")
+col2.metric(label="Maximum Endurance", value=f"{max_end_hrs}h {max_end_mins:02d}m")
+col3.metric(label="Optimal Survey Speed", value=f"{opt_speed:.2f} m/s")
+col4.metric(label="Total Usable Energy", value=f"{usable_energy_wh:.0f} Wh")
+
+st.markdown("---")
+
+# Plotly Interactive Chart
+fig = go.Figure()
+fig.add_trace(go.Scatter(
+    x=valid_speeds, 
+    y=ranges, 
+    mode='lines', 
+    name='Range Profile',
+    line=dict(color='#1976D2', width=3)
+))
+
+# Highlight the optimal point
+fig.add_trace(go.Scatter(
+    x=[opt_speed], 
+    y=[max_range], 
+    mode='markers', 
+    name='Optimal Cruise',
+    marker=dict(color='#D32F2F', size=10, symbol='star')
+))
+
+fig.update_layout(
+    title="Mission Range vs. Speed",
+    xaxis_title="Survey Speed (m/s)",
+    yaxis_title="Total Range (km)",
+    hovermode="x unified",
+    template="plotly_white",
+    showlegend=False
+)
+
+st.plotly_chart(fig, use_container_width=True)
