@@ -12,7 +12,7 @@ st.markdown("Calculate optimal survey speed and maximum track distance for APLUS
 rho_w = 1000 # kg/m^3
 num_thrusters = 2
 v_pitch = 3.94 # m/s
-MAX_MOTOR_POWER_TOTAL = 2100 # Hardware limit (W)
+MAX_CURRENT_TOTAL = 60 # Hardware fuse limit (30A per circuit x 2)
 hotel_power_baseline = 14.8 # Pixhawk + Comms (W)
 
 # Empirical ApisQueen Curve Coefficients
@@ -107,13 +107,18 @@ payload_draw = st.session_state.sensor_slider
 usable_energy_wh = voltage * capacity * (discharge / 100.0)
 total_hotel_power = hotel_power_baseline + payload_draw
 
+# DYNAMIC HARDWARE LIMIT
+# Max allowable motor power before blowing the 60A fuse block
+max_motor_power_total = MAX_CURRENT_TOTAL * voltage
+
 # CdA Extrapolation
 if payload < 24:
     cda = -0.00001649 * (payload**2) + 0.0009375 * payload + 0.0726
 else:
     cda = 0.0856 + 0.0001458 * (payload - 24.0)
 
-speeds = np.arange(0.1, 1.55, 0.01) # High resolution sweep
+# Expanded sweep to 2.50 m/s so it can find the FUSE LIMIT WALL
+speeds = np.arange(0.1, 2.50, 0.01) 
 valid_speeds = []
 ranges = []
 
@@ -126,8 +131,8 @@ for v in speeds:
     p_motor_single = (EMP_A * (t_single**2)) + (EMP_B * t_single) + EMP_C
     total_motor_power = p_motor_single * num_thrusters
     
-    # Cutoff: USV cannot reach this speed
-    if total_motor_power > MAX_MOTOR_POWER_TOTAL:
+    # Cutoff: USV hits the 60A fuse limit
+    if total_motor_power > max_motor_power_total:
         break
         
     total_power = total_motor_power + total_hotel_power
@@ -144,7 +149,6 @@ if ranges:
     max_endurance = max_range/opt_speed*1000/3600
     max_end_hrs = int(max_endurance)
     
-    # [BUG FIX HERE] Multiply by 60 to get minutes
     max_end_mins = int((max_endurance - max_end_hrs) * 60)
 else:
     max_range = 0
@@ -181,11 +185,11 @@ fig.add_trace(go.Scatter(
 ))
 
 fig.update_layout(
-    title="Mission Range vs. Speed",
+    title=f"Mission Range vs. Speed",
     xaxis=dict(
         title="Survey Speed (m/s)",
-        dtick=0.1,  # Forces ticks every 0.1 m/s
-        range=[0.1, max(valid_speeds) if valid_speeds else 1.5]  # Cuts off exactly at max speed
+        dtick=0.1, 
+        range=[0.1, max(valid_speeds) if valid_speeds else 1.5]
     ),
     yaxis_title="Total Range (km)",
     hovermode="x unified",
