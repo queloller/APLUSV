@@ -20,6 +20,24 @@ EMP_A = 0.046405
 EMP_B = 1.854865
 EMP_C = 1.837475
 
+# SESSION STATE INITIALIZATION
+# Initialize the variables in Streamlit's memory so they stay synced
+if 'payload_weight' not in st.session_state:
+    st.session_state.payload_weight = 24
+if 'sensor_draw' not in st.session_state:
+    st.session_state.sensor_draw = 50
+
+# Callback functions to tie the sliders and number boxes together
+def sync_payload_from_slider():
+    st.session_state.payload_weight = st.session_state.payload_slider
+def sync_payload_from_num():
+    st.session_state.payload_weight = st.session_state.payload_num
+
+def sync_sensor_from_slider():
+    st.session_state.sensor_draw = st.session_state.sensor_slider
+def sync_sensor_from_num():
+    st.session_state.sensor_draw = st.session_state.sensor_num
+
 # SIDEBAR INPUTS
 st.sidebar.header("Battery Parameters")
 voltage = st.sidebar.number_input("Battery Voltage (V)", min_value=12.0, max_value=60.0, value=25.6, step=0.1)
@@ -27,12 +45,39 @@ capacity = st.sidebar.number_input("Battery Capacity (Ah)", min_value=10.0, max_
 discharge = st.sidebar.slider("Allowable Discharge (%)", min_value=10, max_value=100, value=80, step=5)
 
 st.sidebar.header("Mission Parameters")
-payload = st.sidebar.slider("Payload Weight (lbs)", min_value=0, max_value=180, value=24, step=2)
-payload_draw = st.sidebar.slider("Payload Power Draw (W)", min_value=0, max_value=500, value=50, step=5)
+
+# Payload Weight UI 
+st.sidebar.markdown("**Payload Weight (lbs)**")
+col1, col2 = st.sidebar.columns([3, 1]) # The [3, 1] ratio makes the slider wider than the box
+with col1:
+    st.slider("Payload Slider", min_value=0, max_value=180, step=2, 
+              key="payload_slider", value=st.session_state.payload_weight, 
+              on_change=sync_payload_from_slider, label_visibility="collapsed")
+with col2:
+    st.number_input("Payload Num", min_value=0, max_value=180, step=2, 
+                    key="payload_num", value=st.session_state.payload_weight, 
+                    on_change=sync_payload_from_num, label_visibility="collapsed")
+
+# Active Sensor Draw UI
+st.sidebar.markdown("**Active Sensor Draw (W)**")
+col3, col4 = st.sidebar.columns([3, 1])
+with col3:
+    st.slider("Sensor Slider", min_value=0, max_value=500, step=5, 
+              key="sensor_slider", value=st.session_state.sensor_draw, 
+              on_change=sync_sensor_from_slider, label_visibility="collapsed")
+with col4:
+    st.number_input("Sensor Num", min_value=0, max_value=500, step=5, 
+                    key="sensor_num", value=st.session_state.sensor_draw, 
+                    on_change=sync_sensor_from_num, label_visibility="collapsed")
+
 
 # CALCULATIONS
+payload = st.session_state.payload_weight
+payload_draw = st.session_state.sensor_draw
+
 usable_energy_wh = voltage * capacity * (discharge / 100.0)
 total_hotel_power = hotel_power_baseline + payload_draw
+
 
 # CdA Extrapolation
 if payload < 24:
