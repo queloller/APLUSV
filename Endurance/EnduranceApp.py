@@ -80,7 +80,7 @@ else:
 # DASHBOARD DISPLAY
 col1, col2, col3, col4 = st.columns(4)
 col1.metric(label="Maximum Track Distance", value=f"{max_range:.1f} km")
-col2.metric(label="Maximum Endurance", value=f"{hours}h {minutes:02d}m")
+col2.metric(label="Maximum Endurance", value=f"{max_end_hrs}h {max_end_mins:02d}m")
 col3.metric(label="Optimal Survey Speed", value=f"{opt_speed:.2f} m/s")
 col4.metric(label="Total Usable Energy", value=f"{usable_energy_wh:.0f} Wh")
 
