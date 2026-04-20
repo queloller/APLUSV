@@ -20,20 +20,30 @@ EMP_A = 0.046405
 EMP_B = 1.854865
 EMP_C = 1.837475
 
-# ==========================================
 # SESSION STATE INITIALIZATION
-# ==========================================
-# Initialize the widget keys directly (No need for a master variable)
+# Initialize the widget keys directly
+if 'discharge_slider' not in st.session_state:
+    st.session_state.discharge_slider = 80
+if 'discharge_num' not in st.session_state:
+    st.session_state.discharge_num = 80
+    
 if 'payload_slider' not in st.session_state:
     st.session_state.payload_slider = 24
 if 'payload_num' not in st.session_state:
     st.session_state.payload_num = 24
+    
 if 'sensor_slider' not in st.session_state:
     st.session_state.sensor_slider = 50
 if 'sensor_num' not in st.session_state:
     st.session_state.sensor_num = 50
 
-# Callbacks: When one changes, explicitly overwrite the OTHER'S key
+# Callbacks: When one changes, explicitly overwrite the other's key
+def sync_discharge(source):
+    if source == 'slider':
+        st.session_state.discharge_num = st.session_state.discharge_slider
+    else:
+        st.session_state.discharge_slider = st.session_state.discharge_num
+
 def sync_payload(source):
     if source == 'slider':
         st.session_state.payload_num = st.session_state.payload_slider
@@ -46,17 +56,26 @@ def sync_sensor(source):
     else:
         st.session_state.sensor_slider = st.session_state.sensor_num
 
-# ==========================================
 # SIDEBAR INPUTS
-# ==========================================
 st.sidebar.header("Battery Parameters")
 voltage = st.sidebar.number_input("Battery Voltage (V)", min_value=12.0, max_value=60.0, value=25.6, step=0.1)
 capacity = st.sidebar.number_input("Battery Capacity (Ah)", min_value=10.0, max_value=500.0, value=100.0, step=1.0)
-discharge = st.sidebar.slider("Allowable Discharge (%)", min_value=10, max_value=100, value=80, step=5)
+
+# Allowable Discharge UI
+st.sidebar.markdown("**Allowable Discharge (%)**")
+col_d1, col_d2 = st.sidebar.columns([3, 1])
+with col_d1:
+    st.slider("Discharge Slider", min_value=10, max_value=100, step=5, 
+              key="discharge_slider", on_change=sync_discharge, args=('slider',), 
+              label_visibility="collapsed")
+with col_d2:
+    st.number_input("Discharge Num", min_value=10, max_value=100, step=5, 
+                    key="discharge_num", on_change=sync_discharge, args=('num',), 
+                    label_visibility="collapsed")
 
 st.sidebar.header("Mission Parameters")
 
-# Payload Weight UI (Notice value= is removed)
+# Payload Weight UI
 st.sidebar.markdown("**Payload Weight (lbs)**")
 col1, col2 = st.sidebar.columns([3, 1])
 with col1:
@@ -68,8 +87,8 @@ with col2:
                     key="payload_num", on_change=sync_payload, args=('num',), 
                     label_visibility="collapsed")
 
-# Active Sensor Draw UI (Notice value= is removed)
-st.sidebar.markdown("**Active Sensor Draw (W)**")
+# Active Sensor Draw UI
+st.sidebar.markdown("**Payload Power Draw (W)**")
 col3, col4 = st.sidebar.columns([3, 1])
 with col3:
     st.slider("Sensor Slider", min_value=0, max_value=500, step=5, 
@@ -80,10 +99,8 @@ with col4:
                     key="sensor_num", on_change=sync_sensor, args=('num',), 
                     label_visibility="collapsed")
 
-# ==========================================
 # CALCULATIONS
-# ==========================================
-# Pull the math variables straight from the slider keys
+discharge = st.session_state.discharge_slider
 payload = st.session_state.payload_slider
 payload_draw = st.session_state.sensor_slider
 
