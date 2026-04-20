@@ -182,7 +182,11 @@ fig.add_trace(go.Scatter(
 
 fig.update_layout(
     title="Mission Range vs. Speed",
-    xaxis_title="Survey Speed (m/s)",
+    xaxis=dict(
+        title="Survey Speed (m/s)",
+        dtick=0.1,  # Forces ticks every 0.1 m/s
+        range=[0.1, max(valid_speeds) if valid_speeds else 1.5]  # Cuts off exactly at max speed
+    ),
     yaxis_title="Total Range (km)",
     hovermode="x unified",
     template="plotly_white",
