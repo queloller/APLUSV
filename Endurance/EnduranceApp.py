@@ -4,8 +4,8 @@ import pandas as pd
 import plotly.graph_objects as go
 
 # PAGE CONFIGURATION
-st.set_page_config(page_title="APLUSV Range Optimizer", layout="wide")
-st.title("APLUSV Range & Optimal Speed Calculator")
+st.set_page_config(page_title="APLUSV Track Distance Optimizer", layout="wide")
+st.title("APLUSV Track Distance & Optimal Speed Calculator")
 st.markdown("Calculate optimal survey speed and maximum track distance for APLUSV.")
 
 # CONSTANTS
@@ -134,6 +134,7 @@ else:
 speeds = np.arange(0.1, 2.50, 0.01) 
 valid_speeds = []
 ranges = []
+endurances = [] # <-- NEW LIST TO HOLD HOVER DATA
 
 for v in speeds:
     drag = 0.5 * rho_w * cda * (v**2)
@@ -154,6 +155,7 @@ for v in speeds:
     
     valid_speeds.append(v)
     ranges.append(range_km)
+    endurances.append(endurance_hrs) # <-- SAVE THE ENDURANCE HERE
 
 # Find Peak Performance
 if ranges:
@@ -180,21 +182,38 @@ st.markdown("---")
 
 # Plotly Interactive Chart
 fig = go.Figure()
+
+# The Main Blue Line
 fig.add_trace(go.Scatter(
     x=valid_speeds, 
     y=ranges, 
     mode='lines', 
     name='Range Profile',
-    line=dict(color='#1976D2', width=3)
+    line=dict(color='#1976D2', width=3),
+    customdata=endurances, # Feed the endurance data to Plotly
+    hovertemplate=(
+        "<b>Speed:</b> %{x:.2f} m/s<br>"
+        "<b>Range:</b> %{y:.1f} km<br>"
+        "<b>Endurance:</b> %{customdata:.1f} hrs"
+        "<extra></extra>" # This hides the annoying secondary trace name box
+    )
 ))
 
-# Highlight the optimal point
+# Highlight the optimal point (The Red Star)
 fig.add_trace(go.Scatter(
     x=[opt_speed], 
     y=[max_range], 
     mode='markers', 
     name='Optimal Cruise',
-    marker=dict(color='#D32F2F', size=10, symbol='star')
+    marker=dict(color='#D32F2F', size=12, symbol='star'),
+    customdata=[max_endurance], # Feed the peak endurance here
+    hovertemplate=(
+        "<b>OPTIMAL CRUISE</b><br>"
+        "<b>Speed:</b> %{x:.2f} m/s<br>"
+        "<b>Range:</b> %{y:.1f} km<br>"
+        "<b>Endurance:</b> %{customdata:.1f} hrs"
+        "<extra></extra>"
+    )
 ))
 
 fig.update_layout(
@@ -205,9 +224,10 @@ fig.update_layout(
         range=[0.1, max(valid_speeds) if valid_speeds else 1.5]
     ),
     yaxis_title="Total Range (km)",
-    hovermode="x unified",
+    hovermode="x", # Changed from "x unified" to standard "x" for cleaner individual popups
     template="plotly_white",
     showlegend=False
 )
 
 st.plotly_chart(fig, use_container_width=True)
+
