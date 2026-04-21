@@ -134,7 +134,7 @@ else:
 speeds = np.arange(0.1, 2.50, 0.01) 
 valid_speeds = []
 ranges = []
-endurances = [] # <-- NEW LIST TO HOLD HOVER DATA
+endurances_formatted = [] # <-- NEW LIST FOR FORMATTED STRINGS
 
 for v in speeds:
     drag = 0.5 * rho_w * cda * (v**2)
@@ -153,9 +153,14 @@ for v in speeds:
     endurance_hrs = usable_energy_wh / total_power
     range_km = v * endurance_hrs * 3.6
     
+    # Format the endurance into an "xxh xxm" string
+    e_hrs = int(endurance_hrs)
+    e_mins = int((endurance_hrs - e_hrs) * 60)
+    formatted_time = f"{e_hrs}h {e_mins:02d}m"
+    
     valid_speeds.append(v)
     ranges.append(range_km)
-    endurances.append(endurance_hrs) # <-- SAVE THE ENDURANCE HERE
+    endurances_formatted.append(formatted_time) # Save the string instead of the raw decimal
 
 # Find Peak Performance
 if ranges:
@@ -190,12 +195,12 @@ fig.add_trace(go.Scatter(
     mode='lines', 
     name='Range Profile',
     line=dict(color='#1976D2', width=3),
-    customdata=endurances, # Feed the endurance data to Plotly
+    customdata=endurances_formatted, # Feed the formatted strings to Plotly
     hovertemplate=(
         "<b>Speed:</b> %{x:.2f} m/s<br>"
         "<b>Range:</b> %{y:.1f} km<br>"
-        "<b>Endurance:</b> %{customdata:.1f} hrs"
-        "<extra></extra>" # This hides the annoying secondary trace name box
+        "<b>Endurance:</b> %{customdata}" # Just print the string directly!
+        "<extra></extra>"
     )
 ))
 
@@ -206,12 +211,12 @@ fig.add_trace(go.Scatter(
     mode='markers', 
     name='Optimal Cruise',
     marker=dict(color='#D32F2F', size=12, symbol='star'),
-    customdata=[max_endurance], # Feed the peak endurance here
+    customdata=[f"{max_end_hrs}h {max_end_mins:02d}m"], # Format the peak string here
     hovertemplate=(
         "<b>OPTIMAL CRUISE</b><br>"
         "<b>Speed:</b> %{x:.2f} m/s<br>"
         "<b>Range:</b> %{y:.1f} km<br>"
-        "<b>Endurance:</b> %{customdata:.1f} hrs"
+        "<b>Endurance:</b> %{customdata}"
         "<extra></extra>"
     )
 ))
@@ -224,10 +229,9 @@ fig.update_layout(
         range=[0.1, max(valid_speeds) if valid_speeds else 1.5]
     ),
     yaxis_title="Total Range (km)",
-    hovermode="x", # Changed from "x unified" to standard "x" for cleaner individual popups
+    hovermode="x",
     template="plotly_white",
     showlegend=False
 )
 
 st.plotly_chart(fig, use_container_width=True)
-
