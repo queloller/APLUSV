@@ -198,7 +198,7 @@ fig.add_trace(go.Scatter(
     customdata=endurances_formatted, # Feed the formatted strings to Plotly
     hovertemplate=(
         "<b>Speed:</b> %{x:.2f} m/s<br>"
-        "<b>Range:</b> %{y:.1f} km<br>"
+        "<b>Track:</b> %{y:.1f} km<br>"
         "<b>Endurance:</b> %{customdata}" # Just print the string directly!
         "<extra></extra>"
     )
@@ -215,7 +215,7 @@ fig.add_trace(go.Scatter(
     hovertemplate=(
         "<b>OPTIMAL CRUISE</b><br>"
         "<b>Speed:</b> %{x:.2f} m/s<br>"
-        "<b>Range:</b> %{y:.1f} km<br>"
+        "<b>Track:</b> %{y:.1f} km<br>"
         "<b>Endurance:</b> %{customdata}"
         "<extra></extra>"
     )
