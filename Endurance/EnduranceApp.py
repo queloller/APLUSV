@@ -111,11 +111,24 @@ total_hotel_power = hotel_power_baseline + payload_draw
 # Max allowable motor power before blowing the 60A fuse block
 max_motor_power_total = MAX_CURRENT_TOTAL * voltage
 
-# CdA Extrapolation
+# =========================================================
+# REAL-WORLD EMPIRICAL CdA EXTRAPOLATION
+# Derived directly from Triadelphia Reservoir Telemetry
+# =========================================================
+
+# Telemetry-derived constants
+dyn_A = -0.00002147
+dyn_B = 0.00120930
+dyn_C = 0.09135618
+dyn_slope = 0.00017872
+cda_24 = 0.10801256
+
 if payload < 24:
-    cda = -0.00001649 * (payload**2) + 0.0009375 * payload + 0.0726
+    # Parabolic curve fit for light loads (0 to 24 lbs)
+    cda = (dyn_A * payload**2) + (dyn_B * payload) + dyn_C
 else:
-    cda = 0.0856 + 0.0001458 * (payload - 24.0)
+    # Linear extrapolation for heavy payloads (24+ lbs)
+    cda = cda_24 + dyn_slope * (payload - 24.0)
 
 # Expanded sweep to 2.50 m/s so it can find the FUSE LIMIT WALL
 speeds = np.arange(0.1, 2.50, 0.01) 
