@@ -304,16 +304,38 @@ fig.add_trace(go.Scatter(
 ))
 
 fig.update_layout(
-    title=f"Mission Range vs. Speed",
+    # 1. Enlarge and bold the Main Title
+    title=dict(
+        text="<b>Mission Range vs. Speed</b>",
+        font=dict(size=24, color="#111") # High-contrast black
+    ),
+    
+    # 2. Enlarge and bold the X-Axis label, plus bump up the tick numbers
     xaxis=dict(
-        title="Survey Speed (m/s)",
+        title=dict(
+            text="<b>Survey Speed (m/s)</b>", 
+            font=dict(size=18, color="#333")
+        ),
+        tickfont=dict(size=14, color="#222", weight="bold"), # Makes the numbers bigger/bolder
         dtick=0.1, 
         range=[0.1, max(valid_speeds) if valid_speeds else 1.5]
     ),
-    yaxis_title="Total Range (km)",
+    
+    # 3. Enlarge and bold the Y-Axis label, plus bump up the tick numbers
+    yaxis=dict(
+        title=dict(
+            text="<b>Total Range (km)</b>", 
+            font=dict(size=18, color="#333")
+        ),
+        tickfont=dict(size=14, color="#222", weight="bold"),
+    ),
+    
     hovermode="x",
     template="plotly_white",
-    showlegend=False
+    showlegend=False,
+    
+    # Optional: Adds a little breathing room around the bigger text
+    margin=dict(l=70, r=30, t=70, b=70) 
 )
 
 st.plotly_chart(fig, use_container_width=True)
