@@ -23,14 +23,14 @@ st.markdown(
         font-weight: bold;
         font-size: 18px;
         margin-top: 15px;
-        margin-bottom: 10px;
+        margin-bottom: 25px; /* FIXED: Increased from 10px to push the first label down */
         box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
     }
     .sidebar-label {
         font-size: 16px; 
         font-weight: 700; 
         color: #333; 
-        margin-bottom: 5px; /* FIXED: Added space so numbers don't overlap */
+        margin-bottom: 5px; 
     }
     </style>
     """,
