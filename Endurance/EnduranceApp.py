@@ -3,7 +3,7 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-st.set_page_config(page_title="APLUSV Track Distance Optimizer", layout="wide")
+st.set_page_config(page_title="APLUSV Track Length Optimizer", layout="wide")
 
 st.markdown(
     """
@@ -37,13 +37,13 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-st.title("APLUSV Track Distance & Optimal Speed Calculator")
+st.title("APLUSV Track Length & Optimal Speed Calculator")
 
 # Use standard HTML styling to dictate exact font size, color, and weight
 st.markdown(
     """
     <p style='font-size: 24px; font-weight: bold; color: #4A4A4A;'>
-    Calculate optimal survey speed and maximum track distance for APLUSV.
+    Calculate optimal survey speed and maximum traverse for APLUSV.
     </p>
     """, 
     unsafe_allow_html=True
@@ -306,7 +306,7 @@ fig.add_trace(go.Scatter(
 fig.update_layout(
     # 1. Enlarge and bold the Main Title
     title=dict(
-        text="<b>Mission Range vs. Speed</b>",
+        text="<b>Track Length vs. Speed</b>",
         font=dict(size=30, color="#111") # High-contrast black
     ),
     
@@ -324,7 +324,7 @@ fig.update_layout(
     # 3. Enlarge and bold the Y-Axis label, plus bump up the tick numbers
     yaxis=dict(
         title=dict(
-            text="<b>Total Range (km)</b>", 
+            text="<b>Total Track Length (km)</b>", 
             font=dict(size=24, color="#333")
         ),
         tickfont=dict(size=18, color="#222", weight="bold"),
