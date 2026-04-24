@@ -208,16 +208,16 @@ else:
 col1, col2, col3, col4 = st.columns(4)
 
 with col1:
-    draw_flashy_card("Max Track Distance", f"{max_range:.1f} km", "Based on 150lb Payload")
+    draw_flashy_card("Max Track Distance", f"{max_range:.1f} km")
 
 with col2:
-    draw_flashy_card("Max Endurance", f"{max_end_hrs}h {max_end_mins:02d}m", "Full Battery Drawdown")
+    draw_flashy_card("Max Endurance", f"{max_end_hrs}h {max_end_mins:02d}m")
 
 with col3:
-    draw_flashy_card("Optimal Survey Speed", f"{opt_speed:.2f} m/s", "Peak Hydrodynamic Efficiency")
+    draw_flashy_card("Optimal Survey Speed", f"{opt_speed:.2f} m/s")
 
 with col4:
-    draw_flashy_card("Total Usable Energy", f"{usable_energy_wh:.0f} Wh", "26.4V Nominal")
+    draw_flashy_card("Total Usable Energy", f"{usable_energy_wh:.0f} Wh")
 
 st.markdown("---")
 
