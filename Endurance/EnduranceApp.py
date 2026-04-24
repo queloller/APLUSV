@@ -8,18 +8,15 @@ st.set_page_config(page_title="APLUSV Track Distance Optimizer", layout="wide")
 st.markdown(
     """
     <style>
-    /* Bulk up the sidebar text */
     [data-testid="stSidebar"] p {
         font-size: 16px !important;
     }
-    /* Make the input box text larger */
     [data-testid="stSidebar"] input {
         font-size: 16px !important;
         font-weight: bold !important;
     }
-    /* Custom classes for our new flashy headers */
     .sidebar-ribbon {
-        background-color: #004B87; /* Engineering Blue */
+        background-color: #004B87; 
         color: white;
         padding: 10px 15px;
         border-radius: 5px;
@@ -33,7 +30,7 @@ st.markdown(
         font-size: 16px; 
         font-weight: 700; 
         color: #333; 
-        margin-bottom: -15px; /* Pulls the slider closer to the text */
+        margin-bottom: 5px; /* FIXED: Added space so numbers don't overlap */
     }
     </style>
     """,
@@ -126,8 +123,13 @@ def sync_sensor(source):
 # Flashy Battery Header
 st.sidebar.markdown('<div class="sidebar-ribbon">🔋 Battery Parameters</div>', unsafe_allow_html=True)
 
-voltage = st.sidebar.number_input("Battery Voltage (V)", min_value=12.0, max_value=60.0, value=25.6, step=0.1)
-capacity = st.sidebar.number_input("Battery Capacity (Ah)", min_value=10.0, max_value=500.0, value=100.0, step=1.0)
+# Battery Voltage UI
+st.sidebar.markdown('<p class="sidebar-label">Battery Voltage (V)</p>', unsafe_allow_html=True)
+voltage = st.sidebar.number_input("Battery Voltage", min_value=12.0, max_value=60.0, value=25.6, step=0.1, label_visibility="collapsed")
+
+# Battery Capacity UI
+st.sidebar.markdown('<p class="sidebar-label">Battery Capacity (Ah)</p>', unsafe_allow_html=True)
+capacity = st.sidebar.number_input("Battery Capacity", min_value=10.0, max_value=500.0, value=100.0, step=1.0, label_visibility="collapsed")
 
 # Allowable Discharge UI
 st.sidebar.markdown('<p class="sidebar-label">Allowable Discharge (%)</p>', unsafe_allow_html=True)
@@ -141,9 +143,11 @@ with col_d2:
                     key="discharge_num", on_change=sync_discharge, args=('num',), 
                     label_visibility="collapsed")
 
+# ... (Mission Parameters code from before stays exactly the same!)
+
 
 # Flashy Mission Header
-st.sidebar.markdown('<div class="sidebar-ribbon">🎯 Mission Parameters</div>', unsafe_allow_html=True)
+st.sidebar.markdown('<div class="sidebar-ribbon">🛥️ Mission Parameters</div>', unsafe_allow_html=True)
 
 # Payload Weight UI
 st.sidebar.markdown('<p class="sidebar-label">Payload Weight (lbs)</p>', unsafe_allow_html=True)
