@@ -5,6 +5,41 @@ import plotly.graph_objects as go
 
 st.set_page_config(page_title="APLUSV Track Distance Optimizer", layout="wide")
 
+st.markdown(
+    """
+    <style>
+    /* Bulk up the sidebar text */
+    [data-testid="stSidebar"] p {
+        font-size: 16px !important;
+    }
+    /* Make the input box text larger */
+    [data-testid="stSidebar"] input {
+        font-size: 16px !important;
+        font-weight: bold !important;
+    }
+    /* Custom classes for our new flashy headers */
+    .sidebar-ribbon {
+        background-color: #004B87; /* Engineering Blue */
+        color: white;
+        padding: 10px 15px;
+        border-radius: 5px;
+        font-weight: bold;
+        font-size: 18px;
+        margin-top: 15px;
+        margin-bottom: 10px;
+        box-shadow: 1px 1px 3px rgba(0,0,0,0.2);
+    }
+    .sidebar-label {
+        font-size: 16px; 
+        font-weight: 700; 
+        color: #333; 
+        margin-bottom: -15px; /* Pulls the slider closer to the text */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True
+)
+
 st.title("APLUSV Track Distance & Optimal Speed Calculator")
 
 # Use standard HTML styling to dictate exact font size, color, and weight
@@ -84,13 +119,18 @@ def sync_sensor(source):
     else:
         st.session_state.sensor_slider = st.session_state.sensor_num
 
+# ==========================================
 # SIDEBAR INPUTS
-st.sidebar.header("Battery Parameters")
+# ==========================================
+
+# Flashy Battery Header
+st.sidebar.markdown('<div class="sidebar-ribbon">🔋 Battery Parameters</div>', unsafe_allow_html=True)
+
 voltage = st.sidebar.number_input("Battery Voltage (V)", min_value=12.0, max_value=60.0, value=25.6, step=0.1)
 capacity = st.sidebar.number_input("Battery Capacity (Ah)", min_value=10.0, max_value=500.0, value=100.0, step=1.0)
 
 # Allowable Discharge UI
-st.sidebar.markdown("**Allowable Discharge (%)**")
+st.sidebar.markdown('<p class="sidebar-label">Allowable Discharge (%)</p>', unsafe_allow_html=True)
 col_d1, col_d2 = st.sidebar.columns([3, 1])
 with col_d1:
     st.slider("Discharge Slider", min_value=10, max_value=100, step=5, 
@@ -101,10 +141,12 @@ with col_d2:
                     key="discharge_num", on_change=sync_discharge, args=('num',), 
                     label_visibility="collapsed")
 
-st.sidebar.header("Mission Parameters")
+
+# Flashy Mission Header
+st.sidebar.markdown('<div class="sidebar-ribbon">🎯 Mission Parameters</div>', unsafe_allow_html=True)
 
 # Payload Weight UI
-st.sidebar.markdown("**Payload Weight (lbs)**")
+st.sidebar.markdown('<p class="sidebar-label">Payload Weight (lbs)</p>', unsafe_allow_html=True)
 col1, col2 = st.sidebar.columns([3, 1])
 with col1:
     st.slider("Payload Slider", min_value=0, max_value=180, step=2, 
@@ -116,7 +158,7 @@ with col2:
                     label_visibility="collapsed")
 
 # Active Sensor Draw UI
-st.sidebar.markdown("**Payload Power Draw (W)**")
+st.sidebar.markdown('<p class="sidebar-label">Payload Power Draw (W)</p>', unsafe_allow_html=True)
 col3, col4 = st.sidebar.columns([3, 1])
 with col3:
     st.slider("Sensor Slider", min_value=0, max_value=500, step=5, 
