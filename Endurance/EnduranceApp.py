@@ -3,27 +3,6 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-# Inject CSS to override the default metric label styling
-st.markdown(
-    """
-    <style>
-    /* Target the metric label */
-    [data-testid="stMetricLabel"] {
-        font-size: 20px !important;
-        font-weight: bold !important;
-        color: #1E1E1E !important; /* Dark gray/black instead of light gray */
-    }
-    
-    /* Optional: Make the metric value even bigger */
-    [data-testid="stMetricValue"] {
-        font-size: 40px !important;
-        color: #004B87 !important; /* A nice 'engineering blue' */
-    }
-    </style>
-    """,
-    unsafe_allow_html=True,
-)
-
 st.set_page_config(page_title="APLUSV Track Distance Optimizer", layout="wide")
 
 st.title("APLUSV Track Distance & Optimal Speed Calculator")
@@ -37,6 +16,25 @@ st.markdown(
     """, 
     unsafe_allow_html=True
 )
+
+# Define a reusable function to draw flashy metric cards
+def draw_flashy_card(title, value, bottom_text=""):
+    st.markdown(
+        f"""
+        <div style="
+            background-color: #f8f9fa;
+            border-left: 5px solid #004B87;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 2px 2px 5px rgba(0,0,0,0.1);
+        ">
+            <p style="margin: 0; font-size: 18px; font-weight: bold; color: #555;">{title}</p>
+            <p style="margin: 0; font-size: 36px; font-weight: 900; color: #111;">{value}</p>
+            <p style="margin: 0; font-size: 14px; color: #888;">{bottom_text}</p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
 # CONSTANTS
 rho_w = 1000 # kg/m^3
@@ -206,12 +204,20 @@ else:
     max_end_hrs = 0
     max_end_mins = 0
 
-# DASHBOARD DISPLAY
+# Use your columns, but call the custom card instead of st.metric
 col1, col2, col3, col4 = st.columns(4)
-col1.metric(label="Maximum Track Distance", value=f"{max_range:.1f} km")
-col2.metric(label="Maximum Endurance", value=f"{max_end_hrs}h {max_end_mins:02d}m")
-col3.metric(label="Optimal Survey Speed", value=f"{opt_speed:.2f} m/s")
-col4.metric(label="Total Usable Energy", value=f"{usable_energy_wh:.0f} Wh")
+
+with col1:
+    draw_flashy_card("Max Track Distance", f"{max_range:.1f} km", "Based on 150lb Payload")
+
+with col2:
+    draw_flashy_card("Max Endurance", f"{max_end_hrs}h {max_end_mins:02d}m", "Full Battery Drawdown")
+
+with col3:
+    draw_flashy_card("Optimal Survey Speed", f"{opt_speed:.2f} m/s", "Peak Hydrodynamic Efficiency")
+
+with col4:
+    draw_flashy_card("Total Usable Energy", f"{usable_energy_wh:.0f} Wh", "26.4V Nominal")
 
 st.markdown("---")
 
