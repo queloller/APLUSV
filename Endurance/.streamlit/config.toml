@@ -1,0 +1,6 @@
+[theme]
+# Matches the exact "Engineering Blue" we used for the sidebar ribbons!
+primaryColor = "#004B87" 
+
+# Optional: You can also force the app into light/dark mode here so it doesn't change based on the judge's laptop settings
+base = "light"
