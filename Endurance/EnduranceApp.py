@@ -3,6 +3,27 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
+# Inject CSS to override the default metric label styling
+st.markdown(
+    """
+    <style>
+    /* Target the metric label */
+    [data-testid="stMetricLabel"] {
+        font-size: 20px !important;
+        font-weight: bold !important;
+        color: #1E1E1E !important; /* Dark gray/black instead of light gray */
+    }
+    
+    /* Optional: Make the metric value even bigger */
+    [data-testid="stMetricValue"] {
+        font-size: 40px !important;
+        color: #004B87 !important; /* A nice 'engineering blue' */
+    }
+    </style>
+    """,
+    unsafe_allow_html=True,
+)
+
 st.set_page_config(page_title="APLUSV Track Distance Optimizer", layout="wide")
 
 st.title("APLUSV Track Distance & Optimal Speed Calculator")
