@@ -3,10 +3,19 @@ import numpy as np
 import pandas as pd
 import plotly.graph_objects as go
 
-# PAGE CONFIGURATION
 st.set_page_config(page_title="APLUSV Track Distance Optimizer", layout="wide")
+
 st.title("APLUSV Track Distance & Optimal Speed Calculator")
-st.markdown("Calculate optimal survey speed and maximum track distance for APLUSV.")
+
+# Use standard HTML styling to dictate exact font size, color, and weight
+st.markdown(
+    """
+    <p style='font-size: 24px; font-weight: bold; color: #4A4A4A;'>
+    Calculate optimal survey speed and maximum track distance for APLUSV.
+    </p>
+    """, 
+    unsafe_allow_html=True
+)
 
 # CONSTANTS
 rho_w = 1000 # kg/m^3
