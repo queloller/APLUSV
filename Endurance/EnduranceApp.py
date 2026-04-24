@@ -307,16 +307,16 @@ fig.update_layout(
     # 1. Enlarge and bold the Main Title
     title=dict(
         text="<b>Mission Range vs. Speed</b>",
-        font=dict(size=24, color="#111") # High-contrast black
+        font=dict(size=30, color="#111") # High-contrast black
     ),
     
     # 2. Enlarge and bold the X-Axis label, plus bump up the tick numbers
     xaxis=dict(
         title=dict(
             text="<b>Survey Speed (m/s)</b>", 
-            font=dict(size=18, color="#333")
+            font=dict(size=24, color="#333")
         ),
-        tickfont=dict(size=14, color="#222", weight="bold"), # Makes the numbers bigger/bolder
+        tickfont=dict(size=18, color="#222", weight="bold"), # Makes the numbers bigger/bolder
         dtick=0.1, 
         range=[0.1, max(valid_speeds) if valid_speeds else 1.5]
     ),
@@ -325,9 +325,9 @@ fig.update_layout(
     yaxis=dict(
         title=dict(
             text="<b>Total Range (km)</b>", 
-            font=dict(size=18, color="#333")
+            font=dict(size=24, color="#333")
         ),
-        tickfont=dict(size=14, color="#222", weight="bold"),
+        tickfont=dict(size=18, color="#222", weight="bold"),
     ),
     
     hovermode="x",
