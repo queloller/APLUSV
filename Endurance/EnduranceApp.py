@@ -249,7 +249,7 @@ with col3:
     draw_flashy_card("Optimal Survey Speed", f"{opt_speed:.2f} m/s")
 
 with col4:
-    draw_flashy_card("Total Continuous Power Draw", f"{total_power:.0f} W")
+    draw_flashy_card("Total Power Draw", f"{total_power:.0f} W")
 
 with col5:
     draw_flashy_card("Total Usable Energy", f"{usable_energy_wh:.0f} Wh")
