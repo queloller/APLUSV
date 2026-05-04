@@ -39,7 +39,6 @@ st.markdown(
 
 st.title("APLUSV Track Length & Optimal Speed Calculator")
 
-# Use standard HTML styling to dictate exact font size, color, and weight
 st.markdown(
     """
     <p style='font-size: 24px; font-weight: bold; color: #4A4A4A;'>
@@ -49,7 +48,7 @@ st.markdown(
     unsafe_allow_html=True
 )
 
-# Define a reusable function to draw flashy metric cards
+# make top metrics pop more
 def draw_flashy_card(title, value, bottom_text=""):
     st.markdown(
         f"""
@@ -73,9 +72,9 @@ rho_w = 1000 # kg/m^3
 num_thrusters = 2
 v_pitch = 3.94 # m/s
 MAX_CURRENT_TOTAL = 60 # Hardware fuse limit (30A per circuit x 2)
-hotel_power_baseline = 14.8 # Pixhawk + Comms (W)
+hotel_power_baseline = 14.8 # Pixhawk + Comms + Nav (W)
 
-# Empirical ApisQueen Curve Coefficients
+# Empirical coefficients based on Apisqueen U92 thruster data
 EMP_A = 0.046405
 EMP_B = 1.854865
 EMP_C = 1.837475
@@ -97,7 +96,7 @@ if 'sensor_slider' not in st.session_state:
 if 'sensor_num' not in st.session_state:
     st.session_state.sensor_num = 50
 
-# Callbacks: When one changes, explicitly overwrite the other's key
+# When one widget change, override the other
 def sync_discharge(source):
     if source == 'slider':
         st.session_state.discharge_num = st.session_state.discharge_slider
@@ -116,22 +115,18 @@ def sync_sensor(source):
     else:
         st.session_state.sensor_slider = st.session_state.sensor_num
 
-# ==========================================
 # SIDEBAR INPUTS
-# ==========================================
 
-# Flashy Battery Header
+# Battery voltage
 st.sidebar.markdown('<div class="sidebar-ribbon">🔋 Battery Parameters</div>', unsafe_allow_html=True)
-
-# Battery Voltage UI
-st.sidebar.markdown('<p class="sidebar-label">Battery Voltage (V)</p>', unsafe_allow_html=True)
+st.sidebar.markdown('<p class="sidebar-label">Battery Voltage (V)</p>', unsafe_allow_html=True) 
 voltage = st.sidebar.number_input("Battery Voltage", min_value=12.0, max_value=60.0, value=25.6, step=0.1, label_visibility="collapsed")
 
-# Battery Capacity UI
+# Battery capacity
 st.sidebar.markdown('<p class="sidebar-label">Battery Capacity (Ah)</p>', unsafe_allow_html=True)
 capacity = st.sidebar.number_input("Battery Capacity", min_value=10.0, max_value=500.0, value=100.0, step=1.0, label_visibility="collapsed")
 
-# Allowable Discharge UI
+# Allowable discharge
 st.sidebar.markdown('<p class="sidebar-label">Allowable Discharge (%)</p>', unsafe_allow_html=True)
 col_d1, col_d2 = st.sidebar.columns([3, 1])
 with col_d1:
@@ -143,13 +138,9 @@ with col_d2:
                     key="discharge_num", on_change=sync_discharge, args=('num',), 
                     label_visibility="collapsed")
 
-# ... (Mission Parameters code from before stays exactly the same!)
-
-
-# Flashy Mission Header
 st.sidebar.markdown('<div class="sidebar-ribbon">🛥️ Mission Parameters</div>', unsafe_allow_html=True)
 
-# Payload Weight UI
+# Payload weight
 st.sidebar.markdown('<p class="sidebar-label">Payload Weight (lbs)</p>', unsafe_allow_html=True)
 col1, col2 = st.sidebar.columns([3, 1])
 with col1:
@@ -161,7 +152,7 @@ with col2:
                     key="payload_num", on_change=sync_payload, args=('num',), 
                     label_visibility="collapsed")
 
-# Active Sensor Draw UI
+# Active sensor draw / payload power draw
 st.sidebar.markdown('<p class="sidebar-label">Payload Power Draw (W)</p>', unsafe_allow_html=True)
 col3, col4 = st.sidebar.columns([3, 1])
 with col3:
@@ -181,16 +172,12 @@ payload_draw = st.session_state.sensor_slider
 usable_energy_wh = voltage * capacity * (discharge / 100.0)
 total_hotel_power = hotel_power_baseline + payload_draw
 
-# DYNAMIC HARDWARE LIMIT
-# Max allowable motor power before blowing the 60A fuse block
+# Max allowable motor power
 max_motor_power_total = MAX_CURRENT_TOTAL * voltage
 
-# =========================================================
-# REAL-WORLD EMPIRICAL CdA EXTRAPOLATION
+# Empirical CdA extrapolation based on hull shape
 # Derived directly from Triadelphia Reservoir Telemetry
-# =========================================================
 
-# Telemetry-derived constants
 dyn_A = -0.00002147
 dyn_B = 0.00120930
 dyn_C = 0.09135618
@@ -204,11 +191,11 @@ else:
     # Linear extrapolation for heavy payloads (24+ lbs)
     cda = cda_24 + dyn_slope * (payload - 24.0)
 
-# Expanded sweep to 2.50 m/s so it can find the FUSE LIMIT WALL
+# Expanded sweep to 2.50 m/s so it can find true limit
 speeds = np.arange(0.1, 2.50, 0.01) 
 valid_speeds = []
 ranges = []
-endurances_formatted = [] # <-- NEW LIST FOR FORMATTED STRINGS
+endurances_formatted = []
 
 for v in speeds:
     drag = 0.5 * rho_w * cda * (v**2)
@@ -234,15 +221,14 @@ for v in speeds:
     
     valid_speeds.append(v)
     ranges.append(range_km)
-    endurances_formatted.append(formatted_time) # Save the string instead of the raw decimal
+    endurances_formatted.append(formatted_time)
 
-# Find Peak Performance
+# Find peak performance
 if ranges:
     max_range = max(ranges)
     opt_speed = valid_speeds[ranges.index(max_range)]
     max_endurance = max_range/opt_speed*1000/3600
     max_end_hrs = int(max_endurance)
-    
     max_end_mins = int((max_endurance - max_end_hrs) * 60)
 else:
     max_range = 0
@@ -250,8 +236,8 @@ else:
     max_end_hrs = 0
     max_end_mins = 0
 
-# Use your columns, but call the custom card instead of st.metric
-col1, col2, col3, col4 = st.columns(4)
+# Metrics
+col1, col2, col3, col4, col5 = st.columns(4)
 
 with col1:
     draw_flashy_card("Max Track Distance", f"{max_range:.1f} km")
@@ -263,14 +249,17 @@ with col3:
     draw_flashy_card("Optimal Survey Speed", f"{opt_speed:.2f} m/s")
 
 with col4:
+    draw_flashy_card("Total Continuous Power Draw", f"{total_power:.0f} W")
+
+with col5:
     draw_flashy_card("Total Usable Energy", f"{usable_energy_wh:.0f} Wh")
 
 st.markdown("---")
 
-# Plotly Interactive Chart
+# Plotly interactive chart
 fig = go.Figure()
 
-# The Main Blue Line
+# The main Blue Line
 fig.add_trace(go.Scatter(
     x=valid_speeds, 
     y=ranges, 
