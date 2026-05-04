@@ -237,7 +237,7 @@ else:
     max_end_mins = 0
 
 # Metrics
-col1, col2, col3, col4, col5 = st.columns(4)
+col1, col2, col3, col4, col5 = st.columns(5)
 
 with col1:
     draw_flashy_card("Max Track Distance", f"{max_range:.1f} km")
