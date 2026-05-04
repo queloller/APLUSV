@@ -196,6 +196,7 @@ speeds = np.arange(0.1, 2.50, 0.01)
 valid_speeds = []
 ranges = []
 endurances_formatted = []
+powers = []
 
 for v in speeds:
     drag = 0.5 * rho_w * cda * (v**2)
@@ -222,22 +223,29 @@ for v in speeds:
     valid_speeds.append(v)
     ranges.append(range_km)
     endurances_formatted.append(formatted_time)
+    powers.append(total_power)
 
 # Find peak performance
 if ranges:
     max_range = max(ranges)
     opt_speed = valid_speeds[ranges.index(max_range)]
+    opt_power = powers[ranges.index(max_range)]
     max_endurance = max_range/opt_speed*1000/3600
     max_end_hrs = int(max_endurance)
     max_end_mins = int((max_endurance - max_end_hrs) * 60)
 else:
     max_range = 0
     opt_speed = 0
+    opt_power = 0
     max_end_hrs = 0
     max_end_mins = 0
 
+# NEW: Combine Endurance and Power into a single 2D array for Plotly
+custom_data_main = list(zip(endurances_formatted, powers))
+custom_data_peak = [[f"{max_end_hrs}h {max_end_mins:02d}m", opt_power]]
+
 # Metrics
-col1, col2, col3, col4, col5 = st.columns(5)
+col1, col2, col3, col4 = st.columns(4)
 
 with col1:
     draw_flashy_card("Max Track Distance", f"{max_range:.1f} km")
@@ -249,9 +257,6 @@ with col3:
     draw_flashy_card("Optimal Survey Speed", f"{opt_speed:.2f} m/s")
 
 with col4:
-    draw_flashy_card("Total Power Draw", f"{total_power:.0f} W")
-
-with col5:
     draw_flashy_card("Total Usable Energy", f"{usable_energy_wh:.0f} Wh")
 
 st.markdown("---")
@@ -266,11 +271,12 @@ fig.add_trace(go.Scatter(
     mode='lines', 
     name='Range Profile',
     line=dict(color='#1976D2', width=3),
-    customdata=endurances_formatted, # Feed the formatted strings to Plotly
+    customdata=custom_data_main, # Feed the 2D array here
     hovertemplate=(
         "<b>Speed:</b> %{x:.2f} m/s<br>"
         "<b>Track:</b> %{y:.1f} km<br>"
-        "<b>Endurance:</b> %{customdata}" # Just print the string directly!
+        "<b>Endurance:</b> %{customdata[0]}<br>"   # Index 0 is the endurance string
+        "<b>Power Draw:</b> %{customdata[1]:.1f} W" # Index 1 is the power float
         "<extra></extra>"
     )
 ))
@@ -282,12 +288,13 @@ fig.add_trace(go.Scatter(
     mode='markers', 
     name='Optimal Cruise',
     marker=dict(color='#D32F2F', size=12, symbol='star'),
-    customdata=[f"{max_end_hrs}h {max_end_mins:02d}m"], # Format the peak string here
+    customdata=custom_data_peak, # Feed the peak 2D array here
     hovertemplate=(
         "<b>OPTIMAL CRUISE</b><br>"
         "<b>Speed:</b> %{x:.2f} m/s<br>"
         "<b>Track:</b> %{y:.1f} km<br>"
-        "<b>Endurance:</b> %{customdata}"
+        "<b>Endurance:</b> %{customdata[0]}<br>"
+        "<b>Power Draw:</b> %{customdata[1]:.1f} W"
         "<extra></extra>"
     )
 ))
