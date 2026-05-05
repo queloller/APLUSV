@@ -191,7 +191,7 @@ else:
     # Linear extrapolation for heavy payloads (24+ lbs)
     cda = cda_24 + dyn_slope * (payload - 24.0)
 
-# Expanded sweep to 2.50 m/s so it can find true limit
+# Expanded sweep to 2.5 m/s so it can find true limit
 speeds = np.arange(0.1, 2.50, 0.01) 
 valid_speeds = []
 ranges = []
@@ -215,7 +215,6 @@ for v in speeds:
     endurance_hrs = usable_energy_wh / total_power
     range_km = v * endurance_hrs * 3.6
     
-    # Format the endurance into an "xxh xxm" string
     e_hrs = int(endurance_hrs)
     e_mins = int((endurance_hrs - e_hrs) * 60)
     formatted_time = f"{e_hrs}h {e_mins:02d}m"
@@ -240,7 +239,6 @@ else:
     max_end_hrs = 0
     max_end_mins = 0
 
-# NEW: Combine Endurance and Power into a single 2D array for Plotly
 custom_data_main = list(zip(endurances_formatted, powers))
 custom_data_peak = [[f"{max_end_hrs}h {max_end_mins:02d}m", opt_power]]
 
@@ -264,24 +262,23 @@ st.markdown("---")
 # Plotly interactive chart
 fig = go.Figure()
 
-# The main Blue Line
 fig.add_trace(go.Scatter(
     x=valid_speeds, 
     y=ranges, 
     mode='lines', 
     name='Range Profile',
     line=dict(color='#1976D2', width=3),
-    customdata=custom_data_main, # Feed the 2D array here
+    customdata=custom_data_main,
     hovertemplate=(
         "<b>Speed:</b> %{x:.2f} m/s<br>"
         "<b>Track:</b> %{y:.1f} km<br>"
-        "<b>Endurance:</b> %{customdata[0]}<br>"   # Index 0 is the endurance string
-        "<b>Power Draw:</b> %{customdata[1]:.1f} W" # Index 1 is the power float
+        "<b>Endurance:</b> %{customdata[0]}<br>"
+        "<b>Power Draw:</b> %{customdata[1]:.1f} W"
         "<extra></extra>"
     )
 ))
 
-# Highlight the optimal point (The Red Star)
+# Highlight the optimal point (red star)
 fig.add_trace(go.Scatter(
     x=[opt_speed], 
     y=[max_range], 
@@ -300,24 +297,22 @@ fig.add_trace(go.Scatter(
 ))
 
 fig.update_layout(
-    # 1. Enlarge and bold the Main Title
+    
     title=dict(
         text="<b>Track Length vs. Speed</b>",
-        font=dict(size=30, color="#111") # High-contrast black
+        font=dict(size=30, color="#111")
     ),
     
-    # 2. Enlarge and bold the X-Axis label, plus bump up the tick numbers
     xaxis=dict(
         title=dict(
             text="<b>Survey Speed (m/s)</b>", 
             font=dict(size=24, color="#333")
         ),
-        tickfont=dict(size=18, color="#222", weight="bold"), # Makes the numbers bigger/bolder
+        tickfont=dict(size=18, color="#222", weight="bold"), 
         dtick=0.1, 
         range=[0.1, max(valid_speeds) if valid_speeds else 1.5]
     ),
     
-    # 3. Enlarge and bold the Y-Axis label, plus bump up the tick numbers
     yaxis=dict(
         title=dict(
             text="<b>Total Track Length (km)</b>", 
@@ -330,7 +325,6 @@ fig.update_layout(
     template="plotly_white",
     showlegend=False,
     
-    # Optional: Adds a little breathing room around the bigger text
     margin=dict(l=70, r=30, t=70, b=70) 
 )
 
